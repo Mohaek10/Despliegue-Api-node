@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>API de Nombres</title>
+</head>
+<body>
+<h1>Guardar y Mostrar Nombres</h1>
+
+<form id="nameForm">
+  <label for="nameInput">Nombre:</label>
+  <input type="text" id="nameInput" required>
+  <button type="button" onclick="saveName()">Guardar</button>
+</form>
+
+<h2>Nombres Guardados:</h2>
+<ul id="nameList"></ul>
+<script>
+  async function saveName() {
+    const nameInput = document.getElementById('nameInput');
+    const name = nameInput.value;
+
+    try {
+      const response = await fetch('http://localhost:3000/user', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ name })
+      });
+
+      if (response.ok) {
+        console.log('Nombre guardado exitosamente');
+        nameInput.value = '';
+        loadNames();
+      } else {
+        console.error('Error al guardar el nombre:', response.statusText);
+      }
+    } catch (error) {
+      console.error('Error de red:', error.message);
+    }
+  }
+
+  async function loadNames() {
+    const nameList = document.getElementById('nameList');
+
+    try {
+      const response = await fetch('http://localhost:3000/users');
+      if (response.ok) {
+        const users = await response.json();
+
+        nameList.innerHTML = '';
+
+        users.forEach(user => {
+          const listItem = document.createElement('li');
+          listItem.textContent = user.name;
+          nameList.appendChild(listItem);
+        });
+      } else {
+        console.error('Error al obtener nombres:', response.statusText);
+      }
+    } catch (error) {
+      console.error('Error de red:', error.message);
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', loadNames);
+</script>
+</body>
+</html>
